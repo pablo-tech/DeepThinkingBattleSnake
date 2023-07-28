@@ -3,6 +3,9 @@ from snake_move import SnakeRandomMove, SnakeMinimaxMove, SnakeAlphabetaMove
 
 class SnakeApi():
 
+    def __init__(self, web_app):
+        self.web_app = web_app
+
     def info(self):
         # print("INFO")
         return {
@@ -14,7 +17,8 @@ class SnakeApi():
         }
     
     def start(self, game_state):
-        print(f"GAME START at {game_state['board']}")
+        # self.web_app.logger.info('%s logged in successfully', game_state['board'])
+        # print(f"GAME START at {game_state['board']}")
         return "start"
 
     def end(self, game_state):
@@ -28,17 +32,21 @@ class SnakeBrain(SnakeApi):
     MINIMAX_BRAIN = "MINIMAX_BRAIN".lower()
     ALPHABETA_BRAIN = "ALPHABETA_BRAIN".lower()
 
-    def __init__(self):
+    def __init__(self, web_app):
+        super().__init__(web_app)
         self.brain_bucket = {}
+        self.max_depth = 10
         # random
         self.brain_bucket[SnakeBrain.RANDOM_BRAIN] = SnakeRandomMove()
         # minimax
-        for depth in range(3):
+        for depth in range(self.max_depth):
             self.brain_bucket[SnakeBrain.MINIMAX_BRAIN + "_" + str(depth)] = SnakeMinimaxMove(depth)
         # alpha beta 
-        for depth in range(3):
+        for depth in range(self.max_depth):
             self.brain_bucket[SnakeBrain.ALPHABETA_BRAIN + "_" + str(depth)] = SnakeAlphabetaMove(depth)
     
     def move(self, game_state, snake_name):
         snake_brain = self.brain_bucket[snake_name.lower()]
         return snake_brain.move(game_state)
+            
+

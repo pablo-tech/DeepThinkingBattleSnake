@@ -1,46 +1,36 @@
-from flask import Flask
-from flask import request
+from flask import Flask, request
 
 from snake_api import SnakeBrain
 
-# If `entrypoint` is not defined in app.yaml, App Engine will look for an app
-# called `app` in `main.py`.
+### app
 snake_app = Flask(__name__)
-snake_api = SnakeBrain()
+snake_brain = SnakeBrain(snake_app)
 
+### routes
 @snake_app.route("/")
-def hello():
-    """Return a friendly HTTP greeting.
+def hello_world():
+    return snake_brain.info()
 
-    Returns:
-        A string with the words 'Hello World!'.
-    """
-    return snake_api.info()
-    # return "Hello World!"
-
-@snake_app.get("/args")
-def args():
-    # game_state = request.get_json()
-    # snake_api.end(game_state)
-    # return jsonify(request.get_json())
-    return request.args
+@snake_app.route("/favicon.ico")
+def fav_ico():
+    return snake_brain.info()
 
 @snake_app.post("/start")
 def on_start():
     game_state = request.get_json()
-    snake_api.start(game_state)
+    snake_brain.start(game_state)
     return "ok"
 
 @snake_app.post("/move")
 def on_move():
     game_state = request.get_json()
     snake_name = request.args["snake_name"]
-    return snake_api.move(game_state, snake_name)
+    return snake_brain.move(game_state, snake_name)
 
 @snake_app.post("/end")
 def on_end():
     game_state = request.get_json()
-    snake_api.end(game_state)
+    snake_brain.end(game_state)
     return "ok"
 
 @snake_app.after_request
@@ -50,11 +40,20 @@ def identify_server(response):
     )
     return response
 
-
 if __name__ == "__main__":
+    ### NGROK
+    # snake_app.config['FLASK_DEBUG'] = True
+    # snake_app.logger.setLevel(logging.INFO)
+    snake_app.run(port=5000)
+    ### LOCAL
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. You
     # can configure startup instructions by adding `entrypoint` to app.yaml.
-    snake_app.run(host="127.0.0.1", port=8080, debug=True)
-# [END gae_python3_app]
-# [END gae_python38_app]
+    # snake_app.run(host="127.0.0.1", port=8080, debug=True)
+
+
+
+# app.logger.debug('This is a DEBUG message')
+# app.logger.info('This is an INFO message')
+# app.logger.warning('This is a WARNING message')
+# app.logger.error('This is an ERROR message')    
